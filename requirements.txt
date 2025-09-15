@@ -1,0 +1,6 @@
+Flask               # Web framework for building the API
+peewee              # Lightweight ORM (MySQL/SQLite/PostgreSQL)
+marshmallow         # Serialization and validation library
+yoyo-migrations     # Database schema migrations
+PyMySQL             # MySQL driver (used by Peewee and yoyo)
+flasgger            # Swagger UI for Flask
