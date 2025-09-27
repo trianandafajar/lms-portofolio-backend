@@ -4,6 +4,7 @@ from app.controllers.classes.create_class import create_class_handler
 from app.controllers.classes.read_class import read_class_handler
 from app.controllers.classes.update_class import update_class_handler
 from app.controllers.classes.delete_class import delete_class_handler
+from app.controllers.classes.my_class import read_my_class_handler
 
 
 classes_bp = Blueprint("classes", __name__, url_prefix="/classes")
@@ -90,6 +91,26 @@ def get_class(class_id: int):
         description: Not Found
     """
     return read_class_handler(class_id=class_id)
+  
+@classes_bp.get("/my")
+def my_classes():
+    """
+    List classes for current user (creator or member)
+    ---
+    tags:
+      - Classes
+    parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: per_page
+        type: integer
+    responses:
+      200:
+        description: OK
+    """
+    return read_my_class_handler()
 
 
 @classes_bp.put("/<int:class_id>")

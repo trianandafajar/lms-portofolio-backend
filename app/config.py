@@ -35,6 +35,10 @@ def env_db_uri() -> str:
     password = os.getenv("DB_PASSWORD", "")
     return f"mysql://{user}:{password}@{host}:{port}/{name}"
 
+def get_secret_key(default: str = "changeme") -> str:
+    load_env()
+    return os.getenv("SECRET_KEY", default)
+
 
 def init_database_from_env() -> None:
     load_env()

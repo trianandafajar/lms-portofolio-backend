@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from app.models.lms_class import LmsClass
-from app.schemas.lms_class import ClassSchema
+from app.schemas.lms_class import ClassListSchema, ClassDetailSchema
 
-list_schema = ClassSchema(many=True)
-detail_schema = ClassSchema()
+list_schema = ClassListSchema(many=True)
+detail_schema = ClassDetailSchema()
 
 
 def read_class_handler(class_id=None):

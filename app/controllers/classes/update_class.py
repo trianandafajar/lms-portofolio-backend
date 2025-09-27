@@ -2,9 +2,9 @@ from flask import request, jsonify
 from peewee import IntegrityError
 
 from app.models.lms_class import LmsClass
-from app.schemas.lms_class import ClassSchema
+from app.schemas.lms_class import ClassListSchema
 
-schema = ClassSchema()
+schema = ClassListSchema()
 
 
 def update_class_handler(class_id):
