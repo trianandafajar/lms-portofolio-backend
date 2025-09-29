@@ -1,26 +1,18 @@
 from flask import request, jsonify
 from app.models.lms_class import LmsClass
 from app.models.class_membership import ClassMembership
+from app.models.user import User
+from app.models.user_profile import UserProfile
 from app.schemas.lms_class import ClassListSchema
 from app.utils.auth import get_user_from_token
-from peewee import JOIN
+from peewee import JOIN, prefetch
 
 list_schema = ClassListSchema(many=True)
 
 def read_my_class_handler():
-    user, error = get_user_from_token()
+    user, profile, error = get_user_from_token()
     if error:
         return error
-
-    # pagination
-    try:
-        page = int(request.args.get("page", 1))
-        per_page = int(request.args.get("per_page", 20))
-    except ValueError:
-        page = 1
-        per_page = 20
-    if per_page > 100:
-        per_page = 100
 
     creator_query = LmsClass.select().where(LmsClass.creator == user)
 
@@ -35,11 +27,17 @@ def read_my_class_handler():
     )
 
     class_ids = set([c.id for c in creator_query] + [c.id for c in member_query])
-    query = LmsClass.select().where(LmsClass.id.in_(class_ids)).order_by(LmsClass.id)
-    rows = list(query.paginate(page, per_page))
+    classes = LmsClass.select().where(LmsClass.id.in_(class_ids))
+    classes_with_creator = []
+    for cls in classes:
+        creator = cls.creator
+        try:
+            profile = UserProfile.get(UserProfile.user == creator.id)
+        except UserProfile.DoesNotExist:
+            profile = None
+        setattr(creator, 'profile', profile)
+        classes_with_creator.append(cls)
 
     return jsonify({
-        "data": list_schema.dump(rows),
-        "page": page,
-        "per_page": per_page,
+        "data": list_schema.dump(classes_with_creator),
     })

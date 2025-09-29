@@ -99,13 +99,6 @@ def my_classes():
     ---
     tags:
       - Classes
-    parameters:
-      - in: query
-        name: page
-        type: integer
-      - in: query
-        name: per_page
-        type: integer
     responses:
       200:
         description: OK

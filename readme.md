@@ -7,7 +7,7 @@
 ### Install
 ```bash
 python -m venv venv
-venv\Scripts\activate
+. venv\Scripts\activate or source venv/Scripts/activate
 pip install -r requirements.txt
 ```
 
