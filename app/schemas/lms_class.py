@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 from app.schemas.user import UserSchema
 
 
@@ -19,7 +19,21 @@ class ClassListSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     creator = fields.Nested(UserSchema, dump_only=True)
+    member_count = fields.Int()
 
 
 class ClassDetailSchema(ClassListSchema):
     memberships = fields.List(fields.Nested(ClassMembershipSchema))
+
+
+class ClassCreateSchema(Schema):
+    title = fields.Str(
+        required=True,
+        validate=validate.Length(min=1, error="Title is required")
+    )
+    description = fields.Str(allow_none=True)
+
+class ClassUpdateSchema(Schema):
+    title = fields.Str(validate=validate.Length(min=1))
+    description = fields.Str(allow_none=True)
+    visibility = fields.Str(validate=validate.OneOf(["private", "public"]))

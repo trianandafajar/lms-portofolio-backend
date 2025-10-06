@@ -27,18 +27,10 @@ def create_class():
           type: object
           required:
             - title
-            - code
-            - creator_id
           properties:
             title:
               type: string
-            code:
-              type: string
-            creator_id:
-              type: integer
             description:
-              type: string
-            visibility:
               type: string
     responses:
       201:

@@ -1,42 +1,58 @@
 from flask import request, jsonify
-from peewee import IntegrityError
-
 from app.models.lms_class import LmsClass
-from app.models.user import User
-from app.schemas.lms_class import ClassListSchema
+from app.models.user_profile import UserProfile
+from app.schemas.lms_class import ClassCreateSchema, ClassListSchema
 from app.utils.auth import get_user_from_token
+from peewee import IntegrityError
+import random, string
+from peewee import DoesNotExist
 
-schema = ClassListSchema()
+create_schema = ClassCreateSchema()
+list_schema = ClassListSchema()
+
+def generate_class_code(length=8):
+    """Generate kode unik untuk kelas"""
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choices(chars, k=length))
+        # pastikan unik di DB
+        exists = LmsClass.select().where(LmsClass.code == code).exists()
+        if not exists:
+            return code
 
 
 def create_class_handler():
-    user, error = get_user_from_token()
+    user, profile, error = get_user_from_token()
     if error:
         return error
 
-    payload = request.get_json(silent=True) or {}
-
-    title = payload.get("title")
-    code = payload.get("code")
-    creator_id = payload.get("creator_id") or user.id
-    description = payload.get("description")
-    visibility = payload.get("visibility", "private")
-
-    if not title or not code:
-        return jsonify({"error": "title and code are required"}), 400
-
-    if not User.get_or_none(User.id == creator_id):
-        return jsonify({"error": "creator not found"}), 404
+    json_data = request.get_json() or {}
+    errors = create_schema.validate(json_data)
+    if errors:
+        return jsonify({"errors": errors}), 400
 
     try:
-        row = LmsClass.create(
-            title=title,
-            code=code,
-            creator=creator_id,
-            description=description,
-            visibility=visibility,
+        new_class = LmsClass.create(
+            title=json_data["title"],
+            description=json_data.get("description"),
+            creator=user,
+            visibility="private",
+            code=generate_class_code()
         )
-    except IntegrityError:
-        return jsonify({"error": "code already exists"}), 409
 
-    return jsonify(schema.dump(row)), 201
+        try:
+            creator_profile = UserProfile.get(UserProfile.user == user.id)
+        except UserProfile.DoesNotExist:
+            creator_profile = None
+        setattr(new_class.creator, "profile", creator_profile)
+
+        return jsonify({
+            "message": "Class created successfully",
+            "data": list_schema.dump(new_class)
+        }), 201
+
+    except IntegrityError as e:
+        return jsonify({
+            "error": "Failed to create class",
+            "details": str(e)
+        }), 500

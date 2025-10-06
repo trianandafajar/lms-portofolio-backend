@@ -5,7 +5,7 @@ from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.schemas.lms_class import ClassListSchema
 from app.utils.auth import get_user_from_token
-from peewee import JOIN, prefetch
+from peewee import fn
 
 list_schema = ClassListSchema(many=True)
 
@@ -14,8 +14,10 @@ def read_my_class_handler():
     if error:
         return error
 
+    # Kelas yang dibuat oleh user
     creator_query = LmsClass.select().where(LmsClass.creator == user)
 
+    # Kelas yang diikuti user
     member_query = (
         LmsClass
         .select(LmsClass)
@@ -26,16 +28,34 @@ def read_my_class_handler():
         )
     )
 
+    # Gabungkan semua class_id
     class_ids = set([c.id for c in creator_query] + [c.id for c in member_query])
+
+    # Ambil kelas dengan id tsb
     classes = LmsClass.select().where(LmsClass.id.in_(class_ids))
+
     classes_with_creator = []
     for cls in classes:
+        # Tambahkan profile creator
         creator = cls.creator
         try:
             profile = UserProfile.get(UserProfile.user == creator.id)
         except UserProfile.DoesNotExist:
             profile = None
-        setattr(creator, 'profile', profile)
+        setattr(creator, "profile", profile)
+
+        # Hitung jumlah member aktif di kelas ini
+        member_count = (
+            ClassMembership
+            .select(fn.COUNT(ClassMembership.id))
+            .where(
+                (ClassMembership.class_ref == cls.id) &
+                (ClassMembership.is_active == True)
+            )
+            .scalar() or 0
+        )
+        setattr(cls, "member_count", member_count)
+
         classes_with_creator.append(cls)
 
     return jsonify({

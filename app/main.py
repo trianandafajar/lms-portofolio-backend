@@ -26,7 +26,7 @@ def register_blueprints(app: Flask, package_name: str, package_path: str, url_pr
             if getattr(obj, "register", None) and getattr(obj, "name", None):
                 prefix = url_prefix + (obj.url_prefix or "")
                 app.register_blueprint(obj, url_prefix=prefix)
-                print(f"🔗 Registered blueprint: {obj.name} at {prefix}")
+                print(f"route: {prefix}")
 
 
 def create_app() -> Flask:
