@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields, validate
 from app.schemas.user import UserSchema
+from app.schemas.lesson import LessonSchema
 
 
 class ClassMembershipSchema(Schema):
@@ -24,6 +25,7 @@ class ClassListSchema(Schema):
 
 class ClassDetailSchema(ClassListSchema):
     memberships = fields.List(fields.Nested(ClassMembershipSchema))
+    lessons = fields.List(fields.Nested(LessonSchema))
 
 
 class ClassCreateSchema(Schema):

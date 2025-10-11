@@ -7,4 +7,9 @@ class UserSchema(Schema):
     is_active = fields.Bool(dump_default=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-    profile = fields.Nested(UserProfileSchema, allow_none=True)
+    profile = fields.Method("get_profile")
+
+    def get_profile(self, obj):
+        if obj.profile and len(obj.profile) > 0:
+            return UserProfileSchema().dump(obj.profile[0])
+        return None
