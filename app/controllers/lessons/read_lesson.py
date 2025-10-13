@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from app.models.lesson import Lesson
-from app.schemas.lesson import LessonSchema
+from app.schemas.lesson import LessonSchema, LessonDetailSchema
 
 list_schema = LessonSchema(many=True)
-detail_schema = LessonSchema()
+detail_schema = LessonDetailSchema()
 
 
 def read_lesson_handler(lesson_id=None):

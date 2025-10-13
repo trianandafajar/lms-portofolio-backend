@@ -5,6 +5,7 @@ from app.controllers.classes.read_class import read_class_handler
 from app.controllers.classes.update_class import update_class_handler
 from app.controllers.classes.delete_class import delete_class_handler
 from app.controllers.classes.my_class import read_my_class_handler
+from app.controllers.classes.join_class import join_class_by_code_handler
 
 
 classes_bp = Blueprint("classes", __name__, url_prefix="/classes")
@@ -62,6 +63,40 @@ def list_classes():
         description: OK
     """
     return read_class_handler()
+  
+@classes_bp.post("/join")
+def join_class_by_code():
+    """
+    Join class by code
+    ---
+    tags:
+      - Classes
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              example: "ABCD1234"
+    responses:
+      201:
+        description: Joined successfully
+      400:
+        description: Missing code
+      404:
+        description: Invalid class code
+      409:
+        description: Already a member
+    """
+    return join_class_by_code_handler()
+
 
 
 @classes_bp.get("/<int:class_id>")
