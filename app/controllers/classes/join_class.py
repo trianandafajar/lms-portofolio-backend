@@ -22,6 +22,9 @@ def join_class_by_code_handler():
     lms_class = LmsClass.get_or_none(LmsClass.code == code)
     if not lms_class:
         return jsonify({"error": "Invalid class code"}), 404
+    
+    if lms_class.creator.id == user.id:
+        return jsonify({"error": "Creator cannot join their own class"}), 403    
 
     existing = ClassMembership.get_or_none(
         (ClassMembership.class_ref == lms_class.id) &
