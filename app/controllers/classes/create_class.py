@@ -5,7 +5,6 @@ from app.schemas.lms_class import ClassCreateSchema, ClassListSchema
 from app.utils.auth import get_user_from_token
 from peewee import IntegrityError
 import random, string
-from peewee import DoesNotExist
 
 create_schema = ClassCreateSchema()
 list_schema = ClassListSchema()
@@ -15,7 +14,6 @@ def generate_class_code(length=8):
     chars = string.ascii_uppercase + string.digits
     while True:
         code = ''.join(random.choices(chars, k=length))
-        # pastikan unik di DB
         exists = LmsClass.select().where(LmsClass.code == code).exists()
         if not exists:
             return code
@@ -42,9 +40,11 @@ def create_class_handler():
 
         try:
             creator_profile = UserProfile.get(UserProfile.user == user.id)
+            setattr(new_class.creator, "profile", [creator_profile])
         except UserProfile.DoesNotExist:
-            creator_profile = None
-        setattr(new_class.creator, "profile", creator_profile)
+            setattr(new_class.creator, "profile", [])
+
+        setattr(new_class, "member_count", 0)
 
         return jsonify({
             "message": "Class created successfully",
