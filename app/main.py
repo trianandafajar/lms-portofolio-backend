@@ -33,7 +33,7 @@ def create_app() -> Flask:
     init_database_from_env()
     app = Flask(__name__)
     
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+    CORS(app, supports_credentials=False, resources={r"/*": {"origins": "*"}})
 
 
     @app.get("/")
