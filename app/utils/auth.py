@@ -2,9 +2,7 @@ from flask import request, jsonify
 import jwt
 from app.models.user import User
 from app.models.user_profile import UserProfile
-from app.config import get_secret_key
-
-SECRET_KEY = get_secret_key()
+from app.config import SECRET_KEY
 
 def get_user_from_token():
     """Decode JWT dan ambil user + profile"""

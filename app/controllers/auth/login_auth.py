@@ -5,9 +5,7 @@ import datetime
 
 from app.models.user import User
 from app.schemas.user import UserSchema
-from app.config import get_secret_key 
-
-SECRET_KEY = get_secret_key()
+from app.config import SECRET_KEY 
 
 user_schema = UserSchema()
 

@@ -6,3 +6,5 @@ PyMySQL             # MySQL driver (used by Peewee and yoyo)
 flasgger            # Swagger UI for Flask
 flask-cors          # handle cors
 PyJWT               # JWT for authentication
+stripe
+dotenv

@@ -1,47 +1,28 @@
 import os
 from urllib.parse import urlparse
+from dotenv import load_dotenv
 from peewee import MySQLDatabase
 from app.db import database
 
+load_dotenv()
 
-def load_env(env_path: str = ".env") -> None:
-    if not os.path.isfile(env_path):
-        return
-    try:
-        with open(env_path, "r", encoding="utf-8") as f:
-            for raw in f:
-                line = raw.strip()
-                if not line or line.startswith("#"):
-                    continue
-                if "=" not in line:
-                    continue
-                key, value = line.split("=", 1)
-                key = key.strip()
-                value = value.strip().strip('"').strip("'")
-                if key and key not in os.environ:
-                    os.environ[key] = value
-    except Exception:
-        pass
+def env(key: str, default: str = None) -> str:
+    return os.getenv(key, default)
 
-
+# 🗄️ Database
 def env_db_uri() -> str:
-    db_uri = os.getenv("DB_URI")
+    db_uri = env("DB_URI")
     if db_uri:
         return db_uri
-    host = os.getenv("DB_HOST", "127.0.0.1")
-    port = os.getenv("DB_PORT", "3306")
-    name = os.getenv("DB_NAME", "lms")
-    user = os.getenv("DB_USER", "root")
-    password = os.getenv("DB_PASSWORD", "")
+
+    host = env("DB_HOST", "127.0.0.1")
+    port = env("DB_PORT", "3306")
+    name = env("DB_NAME", "lms")
+    user = env("DB_USER", "root")
+    password = env("DB_PASSWORD", "")
     return f"mysql://{user}:{password}@{host}:{port}/{name}"
 
-def get_secret_key(default: str = "changeme") -> str:
-    load_env()
-    return os.getenv("SECRET_KEY", default)
-
-
 def init_database_from_env() -> None:
-    load_env()
     parsed = urlparse(env_db_uri())
     if parsed.scheme != "mysql":
         return
@@ -60,3 +41,21 @@ def init_database_from_env() -> None:
         port=port,
         charset="utf8mb4",
     ))
+
+SECRET_KEY = env("SECRET_KEY", "changeme")
+
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
+
+MAIL_HOST = env("MAIL_HOST", "smtp.gmail.com")
+MAIL_PORT = int(env("MAIL_PORT", "587"))
+MAIL_USERNAME = env("MAIL_USERNAME")
+MAIL_PASSWORD = env("MAIL_PASSWORD")
+MAIL_DEFAULT_SENDER = env("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
+
+FLASK_HOST = env("FLASK_HOST", "0.0.0.0")
+FLASK_PORT = int(env("FLASK_PORT", "5000"))
+FLASK_DEBUG = env("FLASK_DEBUG", "1") == "1"
+BACKEND_BASE_URL = env("BACKEND_BASE_URL", "http://127.0.0.1:5000")
+FRONTEND_BASE_URL = env("FRONTEND_BASE_URL",  "http://localhost:3000")

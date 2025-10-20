@@ -34,9 +34,9 @@ def read_my_class_handler():
         creator = cls.creator
         try:
             profile_obj = UserProfile.get(UserProfile.user == creator.id)
-            setattr(creator, "profile", [profile_obj])  # ✅ list berisi 1 objek
+            setattr(creator, "profile", [profile_obj])
         except UserProfile.DoesNotExist:
-            setattr(creator, "profile", [])  # ✅ list kosong
+            setattr(creator, "profile", [])
 
         member_count = (
             ClassMembership
