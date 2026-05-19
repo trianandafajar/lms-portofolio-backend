@@ -58,6 +58,10 @@ def create_subscription_handler():
     if err:
         return err
 
+    user_roles = [ur.role.name for ur in user.roles]
+    if "teacher" not in user_roles:
+        return jsonify({"error": "Only teachers can subscribe to plans."}), 403
+
     payload = request.get_json(silent=True) or {}
     plan_id = payload.get("plan_id")
     gateway = payload.get("gateway", "stripe") # 'stripe' or 'paypal'

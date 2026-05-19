@@ -256,3 +256,29 @@ def record_ai_usage():
     """
     return record_ai_usage_handler()
 
+
+@subscription_bp.get("/check-ai-limit")
+def check_ai_limit_route():
+    """
+    Check AI usage limit for the current user without incrementing it
+    ---
+    tags:
+      - Subscriptions
+    responses:
+      200:
+        description: OK
+      403:
+        description: Limit reached
+    """
+    from flask import jsonify
+    from app.utils.auth import get_user_from_token
+    from app.utils.subscription_limits import check_ai_limit
+    user, profile, error = get_user_from_token()
+    if error:
+        return error
+    allowed, err_resp, status_code = check_ai_limit(user.id)
+    if not allowed:
+        return err_resp, status_code
+    return jsonify({"success": True, "message": "AI usage within limits"}), 200
+
+
