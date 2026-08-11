@@ -69,6 +69,13 @@ def create_app() -> Flask:
     routes_path = os.path.join(os.path.dirname(__file__), "routes")
     register_blueprints(app, "app.routes", routes_path, url_prefix="/api")
 
+    if os.getenv("ENABLE_SCHEDULER", "0") == "1":
+        try:
+            from app.scheduler import ensure_scheduler_started
+            ensure_scheduler_started()
+        except Exception as exc:
+            print(f"⚠️ Scheduler tidak bisa start: {exc}")
+
     if Swagger is not None:
         template = {
             "swagger": "2.0",

@@ -155,3 +155,27 @@ def get_lesson_submission(lesson_id: int):
 def list_lesson_submissions(lesson_id: int):
     from app.controllers.lessons.submit_lesson import list_lesson_submissions_handler
     return list_lesson_submissions_handler(lesson_id)
+
+
+@lessons_bp.post("/<int:lesson_id>/grade-essay")
+def grade_essay(lesson_id: int):
+    from app.controllers.lessons.grade_essay import grade_essay_handler
+    return grade_essay_handler(lesson_id)
+
+
+@lessons_bp.get("/<int:lesson_id>/grades")
+def list_grades(lesson_id: int):
+    from app.controllers.lessons.grade_review import list_grades_handler
+    return list_grades_handler(lesson_id)
+
+
+@lessons_bp.post("/<int:lesson_id>/grades/<int:grade_id>/approve")
+def approve_grade(lesson_id: int, grade_id: int):
+    from app.controllers.lessons.grade_review import approve_grade_handler
+    return approve_grade_handler(lesson_id, grade_id)
+
+
+@lessons_bp.post("/<int:lesson_id>/grades/<int:grade_id>/override")
+def override_grade(lesson_id: int, grade_id: int):
+    from app.controllers.lessons.grade_review import override_grade_handler
+    return override_grade_handler(lesson_id, grade_id)
