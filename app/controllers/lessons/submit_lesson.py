@@ -3,6 +3,7 @@ import datetime
 from flask import request, jsonify
 from app.models.lesson_submission import LessonSubmission
 from app.models.lesson import Lesson
+from app.models.grade import Grade
 from app.utils.auth import get_user_from_token
 
 def submit_lesson_handler(lesson_id):
@@ -61,12 +62,29 @@ def get_lesson_submission_handler(lesson_id):
     if not submission:
         return jsonify({"data": None}), 200
     
+    grades = [
+        {
+            "block_index": g.block_index,
+            "score": g.score,
+            "feedback": g.feedback,
+            "status": g.status or "draft",
+            "graded_at": g.graded_at.isoformat() if g.graded_at else None,
+        }
+        for g in Grade.select()
+        .where(
+            (Grade.lesson_submission == submission.id)
+            & (Grade.status.in_(["approved", "modified"]))
+        )
+        .order_by(Grade.block_index.asc())
+    ]
+    
     return jsonify({
         "data": {
             "id": submission.id,
             "results": json.loads(submission.results_json),
             "score_correct": submission.score_correct,
             "score_wrong": submission.score_wrong,
+            "grades": grades,
             "submitted_at": submission.submitted_at.isoformat() if submission.submitted_at else None
         }
     }), 200
