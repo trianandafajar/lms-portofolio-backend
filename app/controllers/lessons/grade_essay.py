@@ -10,6 +10,7 @@ from app.models.lesson import Lesson
 from app.models.user_profile import UserProfile
 from app.utils.auth import get_user_from_token
 from app.utils.ai_grading import get_ai_grader, is_class_teacher, dump_grade, notify
+from app.utils.subscription_limits import check_ai_limit, record_ai_usage
 
 
 def _extract_essay_answer(submission, block_index):
@@ -65,6 +66,11 @@ def grade_essay_handler(lesson_id):
     )
     if existing:
         return jsonify({"data": dump_grade(existing)}), 200
+
+    teacher_id = lesson.class_ref.creator_id
+    allowed, err_resp, status_code = check_ai_limit(teacher_id)
+    if not allowed:
+        return err_resp, status_code
 
     if not submission.results_json:
         return jsonify({"error": "submission has no answers to grade"}), 400
@@ -128,5 +134,7 @@ def grade_essay_handler(lesson_id):
             "score": int(score),
         },
     )
+
+    record_ai_usage(teacher_id)
 
     return jsonify({"data": dump_grade(grade)}), 201

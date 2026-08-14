@@ -163,6 +163,12 @@ def grade_essay(lesson_id: int):
     return grade_essay_handler(lesson_id)
 
 
+@lessons_bp.get("/<int:lesson_id>/ai-limit")
+def check_lesson_ai_limit(lesson_id: int):
+    from app.controllers.lessons.check_lesson_ai_limit import check_lesson_ai_limit_handler
+    return check_lesson_ai_limit_handler(lesson_id)
+
+
 @lessons_bp.get("/<int:lesson_id>/grades")
 def list_grades(lesson_id: int):
     from app.controllers.lessons.grade_review import list_grades_handler
