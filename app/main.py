@@ -1,7 +1,9 @@
 import os
 import importlib
+import logging
 import pkgutil
-from flask import Flask, jsonify
+from logging.handlers import RotatingFileHandler
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from app.db import database
 
@@ -36,6 +38,35 @@ def create_app() -> Flask:
     
     cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
     CORS(app, supports_credentials=True, resources={r"/*": {"origins": cors_origins}})
+
+    log_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend.log")
+    file_handler = RotatingFileHandler(
+        log_path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    )
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    logging.getLogger().addHandler(file_handler)
+
+    @app.after_request
+    def log_http_errors(response):
+        if response.status_code >= 400:
+            try:
+                body = response.get_data(as_text=True)
+            except Exception:
+                body = ""
+            if len(body) > 500:
+                body = body[:500] + "...(truncated)"
+            app.logger.warning(
+                "%s %s -> %s | body: %s",
+                request.method,
+                request.full_path.rstrip("?"),
+                response.status_code,
+                body,
+            )
+        return response
 
 
     @app.get("/")
