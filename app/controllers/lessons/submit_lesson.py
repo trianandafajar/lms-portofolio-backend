@@ -122,12 +122,23 @@ def list_lesson_submissions_handler(lesson_id):
         except:
             pass
 
+        essay_grades = [
+            {"block_index": g.block_index, "score": g.score}
+            for g in Grade.select()
+            .where(
+                (Grade.lesson_submission == s.id)
+                & (Grade.status.in_(["approved", "modified"]))
+            )
+            .order_by(Grade.block_index.asc())
+        ]
+
         data.append({
             "id": s.id,
             "user_id": s.user.id,
             "user_name": display_name,
             "score_correct": s.score_correct,
             "score_wrong": s.score_wrong,
+            "grades": essay_grades,
             "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None
         })
     
