@@ -52,13 +52,16 @@ def _essays_for_submission(submission, lesson):
             continue
         entry = results.get(str(i)) or results.get(i) or {}
         answer = entry.get("value") if isinstance(entry, dict) else None
+        answer_text = answer or ""
+        if not str(answer_text).strip():
+            continue
         essays.append(
             {
                 "block_index": i,
                 "question": block.get("title") or "",
                 "placeholder": block.get("placeholder") or "",
                 "max_length": block.get("max_length"),
-                "answer": answer or "",
+                "answer": answer_text,
             }
         )
     return essays
